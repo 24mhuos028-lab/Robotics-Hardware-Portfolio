@@ -13,7 +13,17 @@
 
 ---
 
-## 2. Robofest Gujarat 6.0 — Autonomous Drone Swarm Avionics (KiCad 10.0.5)
+## 2. NiDAR Drone Challenge — Custom VEGAPilot WebGCS (Ground Control Station)
+* 🌐 **[Launch Interactive VEGAPilot WebGCS Application](https://share.gemini.google/0Tef3JjxfFzu)** *(Live tactical flight deck & mission planner)*
+* **Architecture & Telemetry Engine:** Designed a dedicated web-based Ground Control Station for the C-DAC THEJAS32 RISC-V Track 2 drone challenge, integrating 915 MHz MAVLink 2.0 telemetry streaming (24 ms latency, RSSI monitoring), 3D DGPS/RTK positioning, and real-time PFD attitude instrumentation.
+* **Key Autonomous Modules:**
+  * **Tactical Arena Flight Deck & Geofence:** Dynamic satellite map overlay with a configurable safety radius (Navlakhi Arena 110m × 120m cage) and active target marker locks.
+  * **Interactive Mission Planner:** Dynamic waypoints route builder with automated pattern presets (Perimeter Boundary Scan & Cross-Grid Inspection) and CSV/JSON flight log auditing.
+  * **Pre-Flight Interlocks & Failsafe Supervision:** Slide-to-confirm motor arming sequence gating pack voltage (>22.8V on 6S LiPo), RTK 3D fix (>12 sats), telemetry link quality, and one-touch RTL/Emergency Land abort logic.
+
+---
+
+## 3. Robofest Gujarat 6.0 — Autonomous Drone Swarm Avionics (KiCad 10.0.5)
 Complete 5-sheet hierarchical schematic architecture for a sub-750g GPS-denied minefield navigation drone swarm:
 
 * 📄 **Sheet 1: Central Avionics Interposer & Power Distribution (PDB)**  
@@ -25,4 +35,19 @@ Complete 5-sheet hierarchical schematic architecture for a sub-750g GPS-denied m
   *4-motor 3-phase power delivery with `SMAJ18A` 18V TVS transient suppression and `470 µF` 35V bulk decoupling.*
 
 * 📄 **Sheet 3: Optical Flow, LiDAR & 15-Pin MIPI CSI Camera Interface**  
-  👉 **[Open on Mobile / Direct PDF](https://raw.githubusercontent.com/24mhuos028-lab/Robotics-Hardware-Portfolio/main/Subsystem_3_Optical_Flow,LiDAR_and_Camera.pdf)** | **[View in GitHub Desktop](
+  👉 **[Open on Mobile / Direct PDF](https://raw.githubusercontent.com/24mhuos028-lab/Robotics-Hardware-Portfolio/main/Subsystem_3_Optical_Flow,LiDAR_and_Camera.pdf)** | **[View in GitHub Desktop](https://github.com/24mhuos028-lab/Robotics-Hardware-Portfolio/blob/main/Subsystem_3_Optical_Flow,LiDAR_and_Camera.pdf)**  
+  *MicoAir MTF-01 UART odometry and 15-pin MIPI CSI camera bus with `4.7 kΩ` I2C pull-ups and `100 nF` decoupling.*
+
+* 📄 **Sheet 4: ESP32-S3 Wireless Swarm Mesh & WS2812B LED Array**  
+  👉 **[Open on Mobile / Direct PDF](https://raw.githubusercontent.com/24mhuos028-lab/Robotics-Hardware-Portfolio/main/Subsystem_4_Wireless_mesh_and_LED_Indicator.pdf)** | **[View in GitHub Desktop](https://github.com/24mhuos028-lab/Robotics-Hardware-Portfolio/blob/main/Subsystem_4_Wireless_mesh_and_LED_Indicator.pdf)**  
+  *Inter-drone I2C/sync interrupt bus (`SWARM_I2C_SDA/SCL`, `SWARM_SYNC_INT`) and addressable RGB guidance strip driver.*
+
+* 📄 **Sheet 5: ExpressLRS Radio Receiver & Safety Buzzer Circuit**  
+  👉 **[Open on Mobile / Direct PDF](https://raw.githubusercontent.com/24mhuos028-lab/Robotics-Hardware-Portfolio/main/Subsytem_5_Radio_Reciever_and_Safety_Buzzer.pdf)** | **[View in GitHub Desktop](https://github.com/24mhuos028-lab/Robotics-Hardware-Portfolio/blob/main/Subsytem_5_Radio_Reciever_and_Safety_Buzzer.pdf)**  
+  *Dedicated hardware kill-switch receiver link and fail-safe acoustic alarm.*
+
+---
+
+## 4. Academic Certification
+* 🏅 **NPTEL Elite + Silver Certificate (82% — National Course Topper): Mechanics and Control of Robotic Manipulators**  
+  👉 **[Open Certificate on Mobile / Direct PDF](https://raw.githubusercontent.com/24mhuos028-lab/Robotics-Hardware-Portfolio/main/NPTEL_Manipulators_Certificate_Dev_Naik.pdf)** | **[View in GitHub Desktop](https://github.com/24mhuos028-lab/Robotics-Hardware-Portfolio/blob/main/NPTEL_Manipulators_Certificate_Dev_Naik.pdf)**
