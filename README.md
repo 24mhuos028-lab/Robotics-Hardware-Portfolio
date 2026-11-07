@@ -14,12 +14,9 @@
 ---
 
 ## 2. NiDAR Drone Challenge — Custom VEGAPilot WebGCS (Ground Control Station)
-* 🌐 **[Launch Interactive VEGAPilot WebGCS Application](https://share.gemini.google/0Tef3JjxfFzu)** *(Live tactical flight deck & mission planner)*
-* **Architecture & Telemetry Engine:** Designed a dedicated web-based Ground Control Station for the C-DAC THEJAS32 RISC-V Track 2 drone challenge, integrating 915 MHz MAVLink 2.0 telemetry streaming (24 ms latency, RSSI monitoring), 3D DGPS/RTK positioning, and real-time PFD attitude instrumentation.
-* **Key Autonomous Modules:**
-  * **Tactical Arena Flight Deck & Geofence:** Dynamic satellite map overlay with a configurable safety radius (Navlakhi Arena 110m × 120m cage) and active target marker locks.
-  * **Interactive Mission Planner:** Dynamic waypoints route builder with automated pattern presets (Perimeter Boundary Scan & Cross-Grid Inspection) and CSV/JSON flight log auditing.
-  * **Pre-Flight Interlocks & Failsafe Supervision:** Slide-to-confirm motor arming sequence gating pack voltage (>22.8V on 6S LiPo), RTK 3D fix (>12 sats), telemetry link quality, and one-touch RTL/Emergency Land abort logic.
+* 🚀 **[Launch Live Operational WebGCS Application](https://24mhuos028-lab.github.io/Robotics-Hardware-Portfolio/)** *(Hosted on GitHub Pages)*
+* 🌐 **[Alternative Live Mirror](https://share.gemini.google/0Tef3JjxfFzu)**
+* 💻 **[View WebGCS Source Code (HTML/JS/CSS)](./index.html)**
 
 ---
 
