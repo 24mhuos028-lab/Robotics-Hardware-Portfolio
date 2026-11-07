@@ -7,9 +7,9 @@
 ## 1. 6-DOF Industrial Robotic Manipulator Arm (Autodesk Inventor)
 ![6-DOF Manipulator Arm Render](./6_DOF_Manipulator_Arm_Render.png)
 
-* 🧊 **[Interactive 3D Browser View — Standard Resolution (.STL)](https://github.com/24mhuos028-lab/Robotics-Hardware-Portfolio/blob/main/6%20DOF%20Manipulator%20arm.stl)** *(Tap to rotate & zoom in 3D)*
-* 🧊 **[Interactive 3D Browser View — High-Resolution Mesh (.STL)](https://github.com/24mhuos028-lab/Robotics-Hardware-Portfolio/blob/main/Mechanical_Assembly_6%20DOF%20Manipulator%20arm%20.stl)**
-* ⚙️ **[Download Native Autodesk Inventor Assembly (.IAM)](https://raw.githubusercontent.com/24mhuos028-lab/Robotics-Hardware-Portfolio/main/6%20DOF%20Manipulator%20arm.iam)**
+* 📱 **[Open Interactive 3D Viewer on Mobile / Any Device](https://3dviewer.net/#model=https://raw.githubusercontent.com/24mhuos028-lab/Robotics-Hardware-Portfolio/main/6%20DOF%20Manipulator%20arm.stl)** *(Rotates, zooms & pans smoothly on phones and laptops)*
+* 🖥️ **[View in Native GitHub 3D Viewer (Desktop)](https://github.com/24mhuos028-lab/Robotics-Hardware-Portfolio/blob/main/6%20DOF%20Manipulator%20arm.stl)** *(Requires desktop browser or "Desktop Site" mode)*
+* ⚙️ **[Download Complete Universal CAD Assembly (.STEP)](https://raw.githubusercontent.com/24mhuos028-lab/Robotics-Hardware-Portfolio/main/6_DOF_Manipulator_Arm.step)** *(Opens in SolidWorks, Inventor, Fusion360 & CATIA)*
 
 ---
 
