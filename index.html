@@ -1,0 +1,1073 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VEGAPILOT GCS — Ground Control Station</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f7f9fb;
+      color: #1e293b;
+      margin: 0;
+      padding: 0;
+    }
+    .font-mono-num {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#f7f9fb] text-[#1e293b]">
+
+  <!-- Top Header Bar -->
+  <header class="bg-[#fbfcfe] border-b border-[#dde3ea] px-5 py-3 flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded bg-[#415871] text-white font-bold text-sm flex items-center justify-center">
+        V
+      </div>
+      <div>
+        <div class="text-sm font-bold tracking-tight text-slate-900">VEGAPILOT GCS</div>
+        <div class="text-xs text-[#526980]">Ground Control Station · Local Interface</div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <span id="top-conn-badge" class="px-3 py-1 rounded text-xs font-medium border bg-[#fff5df] border-[#e6d0a3] text-[#765000]">
+        Backend not connected
+      </span>
+    </div>
+  </header>
+
+  <!-- Main Body: Left Sidebar + Right Window Content -->
+  <div class="flex-1 flex flex-col md:flex-row">
+    <!-- Left Navigation Sidebar -->
+    <aside class="w-full md:w-60 bg-[#fbfcfe] border-b md:border-b-0 md:border-r border-[#dde3ea] p-3 flex flex-col justify-between shrink-0">
+      <div>
+        <div class="text-[11px] font-bold uppercase tracking-wider text-[#7d8ea1] px-2.5 py-1.5">
+          GROUND CONTROL
+        </div>
+        <nav class="space-y-1 mt-1" id="sidebar-nav">
+          <button type="button" data-tab="LIVE_DATA" class="nav-btn w-full text-left px-3 py-2 rounded text-xs font-semibold flex items-center gap-2.5 transition bg-[#415871] text-white">
+            <span class="text-sm">▦</span>
+            <span>Live Data Analysis</span>
+          </button>
+          <button type="button" data-tab="CALIBRATION" class="nav-btn w-full text-left px-3 py-2 rounded text-xs font-medium flex items-center gap-2.5 transition text-[#4d6279] hover:bg-[#eef2f6] hover:text-slate-900">
+            <span class="text-sm">◎</span>
+            <span>Sensor Calibration</span>
+          </button>
+          <button type="button" data-tab="MISSION_PLANNER" class="nav-btn w-full text-left px-3 py-2 rounded text-xs font-medium flex items-center gap-2.5 transition text-[#4d6279] hover:bg-[#eef2f6] hover:text-slate-900">
+            <span class="text-sm">⌖</span>
+            <span>Mission Planner</span>
+          </button>
+          <button type="button" data-tab="FLIGHT_LOGS" class="nav-btn w-full text-left px-3 py-2 rounded text-xs font-medium flex items-center gap-2.5 transition text-[#4d6279] hover:bg-[#eef2f6] hover:text-slate-900">
+            <span class="text-sm">▤</span>
+            <span>Flight Logs &amp; Analysis</span>
+          </button>
+          <button type="button" data-tab="FC_CONNECTION" class="nav-btn w-full text-left px-3 py-2 rounded text-xs font-medium flex items-center gap-2.5 transition text-[#4d6279] hover:bg-[#eef2f6] hover:text-slate-900">
+            <span class="text-sm">⇄</span>
+            <span>FC Connection</span>
+          </button>
+          <button type="button" data-tab="TRANSCEIVER" class="nav-btn w-full text-left px-3 py-2 rounded text-xs font-medium flex items-center gap-2.5 transition text-[#4d6279] hover:bg-[#eef2f6] hover:text-slate-900">
+            <span class="text-sm">⌘</span>
+            <span>Transceiver &amp; Control</span>
+          </button>
+        </nav>
+      </div>
+
+      <div class="mt-6 p-3 rounded bg-[#f7f9fb] border border-[#dde3ea] text-[11px] text-[#526980] space-y-1">
+        <div class="font-semibold text-[#415871]">VEGAPILOT · Prototype interface</div>
+        <div>Real control requires a verified backend.</div>
+      </div>
+    </aside>
+
+    <!-- Right Content Area -->
+    <main class="flex-1 p-5 space-y-5 overflow-y-auto">
+
+      <!-- =================================================================
+           WINDOW 1: LIVE DATA ANALYSIS (With Artificial Horizon HUD!)
+           ================================================================= -->
+      <section id="win-LIVE_DATA" class="space-y-4">
+        <div class="bg-[#fbfcfe] border border-[#dde3ea] rounded-lg p-4 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h1 class="text-base font-bold text-slate-900">Live Data Analysis</h1>
+              <p class="text-xs text-[#526980]">Monitor verified telemetry from the connected flight controller.</p>
+            </div>
+            <span id="live-backend-pill" class="px-2.5 py-1 rounded text-xs font-medium border bg-[#fff5df] border-[#e6d0a3] text-[#765000]">
+              Backend status: offline
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-2 border-t border-[#dde3ea] text-xs">
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded px-3 py-1.5">
+              <span class="text-[#7d8ea1] block text-[10px]">FC</span>
+              <span id="stat-fc" class="font-mono-num font-semibold text-[#415871]">Unknown</span>
+            </div>
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded px-3 py-1.5">
+              <span class="text-[#7d8ea1] block text-[10px]">Telemetry</span>
+              <span id="stat-telem" class="font-mono-num font-semibold text-[#415871]">Unknown</span>
+            </div>
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded px-3 py-1.5">
+              <span class="text-[#7d8ea1] block text-[10px]">Mode</span>
+              <span id="stat-mode" class="font-mono-num font-semibold text-[#415871]">—</span>
+            </div>
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded px-3 py-1.5">
+              <span class="text-[#7d8ea1] block text-[10px]">Armed</span>
+              <span id="stat-armed" class="font-mono-num font-semibold text-[#415871]">Unknown</span>
+            </div>
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded px-3 py-1.5">
+              <span class="text-[#7d8ea1] block text-[10px]">Simulation</span>
+              <span class="font-mono-num font-semibold text-[#415871]">OFF</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Primary Subwindows Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <!-- Subwindow 1: Attitude + Artificial Horizon HUD -->
+          <div class="lg:col-span-5 bg-[#fbfcfe] border border-[#dde3ea] rounded-lg p-4 flex flex-col justify-between space-y-3">
+            <div class="flex items-center justify-between border-b border-[#dde3ea] pb-2">
+              <h2 class="text-sm font-bold text-slate-900">Attitude</h2>
+              <span id="att-status-badge" class="px-2 py-0.5 rounded bg-[#f7f9fb] border border-[#dde3ea] text-[11px] text-[#526980]">
+                No telemetry
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center py-1">
+              <!-- Artificial Horizon (HUD / Attitude Indicator) Canvas -->
+              <div class="sm:col-span-7 flex flex-col items-center justify-center bg-[#f7f9fb] border border-[#dde3ea] rounded-lg p-2.5">
+                <div class="w-full flex items-center justify-between text-[10px] font-semibold uppercase tracking-wider text-[#526980] mb-1 px-1">
+                  <span>Artificial Horizon (HUD)</span>
+                  <span id="hud-active-label">NO DATA</span>
+                </div>
+                <canvas id="horizon-canvas" width="176" height="176" class="w-40 h-40 rounded"></canvas>
+              </div>
+
+              <!-- Roll, Pitch, Yaw Cards -->
+              <div class="sm:col-span-5 space-y-2.5">
+                <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+                  <div class="text-[11px] text-[#526980]">Roll</div>
+                  <div id="val-roll" class="text-lg font-mono-num font-bold text-slate-900 mt-0.5">— °</div>
+                </div>
+                <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+                  <div class="text-[11px] text-[#526980]">Pitch</div>
+                  <div id="val-pitch" class="text-lg font-mono-num font-bold text-slate-900 mt-0.5">— °</div>
+                </div>
+                <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+                  <div class="text-[11px] text-[#526980]">Yaw</div>
+                  <div id="val-yaw" class="text-lg font-mono-num font-bold text-slate-900 mt-0.5">— °</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subwindow 2: Battery -->
+          <div class="lg:col-span-4 bg-[#fbfcfe] border border-[#dde3ea] rounded-lg p-4 flex flex-col justify-between space-y-3">
+            <div class="flex items-center justify-between border-b border-[#dde3ea] pb-2">
+              <h2 class="text-sm font-bold text-slate-900">Battery</h2>
+              <span class="px-2 py-0.5 rounded bg-[#f7f9fb] border border-[#dde3ea] text-[11px] text-[#526980]">
+                Reported values only
+              </span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2.5">
+              <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+                <div class="text-[11px] text-[#526980]">Voltage</div>
+                <div id="val-voltage" class="text-base font-mono-num font-bold text-slate-900 mt-0.5">— V</div>
+              </div>
+              <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+                <div class="text-[11px] text-[#526980]">Current</div>
+                <div id="val-current" class="text-base font-mono-num font-bold text-slate-900 mt-0.5">— A</div>
+              </div>
+              <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+                <div class="text-[11px] text-[#526980]">Capacity remaining</div>
+                <div id="val-cap" class="text-base font-mono-num font-bold text-slate-900 mt-0.5">— %</div>
+              </div>
+              <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+                <div class="text-[11px] text-[#526980]">Estimated flight time</div>
+                <div id="val-ftime" class="text-base font-mono-num font-bold text-slate-900 mt-0.5">— min</div>
+              </div>
+            </div>
+
+            <p class="text-[11px] text-[#7d8ea1]">
+              Cell count and time estimates appear only when reliable source data exists.
+            </p>
+          </div>
+
+          <!-- Subwindow 3: Ground Speed -->
+          <div class="lg:col-span-3 bg-[#fbfcfe] border border-[#dde3ea] rounded-lg p-4 flex flex-col justify-between space-y-3">
+            <div class="flex items-center justify-between border-b border-[#dde3ea] pb-2">
+              <h2 class="text-sm font-bold text-slate-900">Ground Speed</h2>
+              <span class="px-2 py-0.5 rounded bg-[#f7f9fb] border border-[#dde3ea] text-[11px] text-[#526980]">
+                Ground speed only
+              </span>
+            </div>
+
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-4 text-center my-auto">
+              <div id="val-gspeed" class="text-2xl font-mono-num font-bold text-slate-900">— m/s</div>
+              <div id="val-gspeed-note" class="text-[11px] text-[#7d8ea1] mt-1">No valid speed message received</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subwindow 4: GPS / Position -->
+        <div class="bg-[#fbfcfe] border border-[#dde3ea] rounded-lg p-4 space-y-3">
+          <div class="flex items-center justify-between border-b border-[#dde3ea] pb-2">
+            <h2 class="text-sm font-bold text-slate-900">GPS / Position</h2>
+            <span id="gps-status-badge" class="px-2 py-0.5 rounded bg-[#f7f9fb] border border-[#dde3ea] text-[11px] text-[#526980]">
+              Unavailable
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 text-xs">
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+              <span class="text-[#526980] block text-[11px]">Latitude</span>
+              <span id="val-lat" class="font-mono-num font-bold text-slate-900">—</span>
+            </div>
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+              <span class="text-[#526980] block text-[11px]">Longitude</span>
+              <span id="val-lon" class="font-mono-num font-bold text-slate-900">—</span>
+            </div>
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+              <span class="text-[#526980] block text-[11px]">Fix</span>
+              <span id="val-fix" class="font-mono-num font-bold text-slate-900">—</span>
+            </div>
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+              <span class="text-[#526980] block text-[11px]">Satellites</span>
+              <span id="val-sats" class="font-mono-num font-bold text-slate-900">—</span>
+            </div>
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+              <span class="text-[#526980] block text-[11px]">Altitude</span>
+              <span id="val-alt" class="font-mono-num font-bold text-slate-900">—</span>
+            </div>
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+              <span class="text-[#526980] block text-[11px]">Position age</span>
+              <span id="val-pos-age" class="font-mono-num font-bold text-slate-900">—</span>
+            </div>
+          </div>
+
+          <div class="bg-[#f7f9fb] border border-dashed border-[#cbd5e1] rounded p-4 text-center text-xs text-[#526980]">
+            Map appears here after valid GPS data and a map source are configured.
+          </div>
+        </div>
+
+        <!-- Subwindow 5: Advanced Sensor Data -->
+        <div class="bg-[#fbfcfe] border border-[#dde3ea] rounded-lg p-4 space-y-3">
+          <div class="flex items-center justify-between border-b border-[#dde3ea] pb-2">
+            <h2 class="text-sm font-bold text-slate-900">Advanced Sensor Data</h2>
+            <button type="button" id="btn-toggle-adv" class="px-2.5 py-1 rounded bg-[#f7f9fb] hover:bg-[#eef2f6] border border-[#dde3ea] text-xs text-[#415871] font-medium">
+              Hide details
+            </button>
+          </div>
+
+          <div id="adv-sensor-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 text-xs">
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+              <span class="text-[#526980] block text-[11px]">Accelerometer XYZ</span>
+              <span id="val-accel" class="font-mono-num font-bold text-slate-900">—</span>
+            </div>
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+              <span class="text-[#526980] block text-[11px]">Gyroscope XYZ</span>
+              <span id="val-gyro" class="font-mono-num font-bold text-slate-900">—</span>
+            </div>
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+              <span class="text-[#526980] block text-[11px]">Magnetometer XYZ</span>
+              <span id="val-mag" class="font-mono-num font-bold text-slate-900">—</span>
+            </div>
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+              <span class="text-[#526980] block text-[11px]">Message age</span>
+              <span id="val-msg-age" class="font-mono-num font-bold text-slate-900">—</span>
+            </div>
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+              <span class="text-[#526980] block text-[11px]">Update rate</span>
+              <span id="val-rate" class="font-mono-num font-bold text-slate-900">—</span>
+            </div>
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+              <span class="text-[#526980] block text-[11px]">Parse errors</span>
+              <span id="val-perr" class="font-mono-num font-bold text-slate-900">—</span>
+            </div>
+          </div>
+
+          <p class="text-xs text-[#7d8ea1]">
+            Waiting for verified backend telemetry. No values are simulated.
+          </p>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           WINDOW 2: SENSOR CALIBRATION
+           ================================================================= -->
+      <section id="win-CALIBRATION" class="space-y-4 hidden">
+        <div class="bg-[#fbfcfe] border border-[#dde3ea] rounded-lg p-4 space-y-2">
+          <div class="flex items-center justify-between">
+            <h1 class="text-base font-bold text-slate-900">Guided Sensor Calibration</h1>
+            <span class="px-2.5 py-0.5 rounded bg-[#fff5df] border border-[#e6d0a3] text-xs text-[#765000]">
+              Firmware support required
+            </span>
+          </div>
+          <p class="text-xs text-[#526980]">
+            Calibration requires a connected, verified FC interface. This standalone prototype sends no calibration commands unless connected.
+          </p>
+        </div>
+
+        <div class="bg-[#fbfcfe] border border-[#dde3ea] rounded-lg p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 id="cal-step-title" class="text-sm font-bold text-slate-900">Step 1 — Check readiness</h2>
+              <p id="cal-step-desc" class="text-xs text-[#526980]">Confirm connection and supported calibration procedures.</p>
+            </div>
+            <span class="px-2.5 py-0.5 rounded bg-[#f7f9fb] border border-[#dde3ea] text-xs text-[#526980]">
+              Not checked
+            </span>
+          </div>
+
+          <div class="p-3 rounded bg-[#fff5df] border border-[#e6d0a3] text-xs text-[#765000]">
+            Secure the aircraft. Remove propellers before any bench procedure that could enable motors.
+          </div>
+
+          <div class="flex flex-wrap gap-2 pt-1">
+            <button type="button" id="btn-cal-prev" class="px-3 py-1.5 rounded bg-[#f7f9fb] hover:bg-[#eef2f6] border border-[#dde3ea] text-xs text-[#415871] font-medium">
+              Previous
+            </button>
+            <button type="button" id="btn-cal-next" class="px-3 py-1.5 rounded bg-[#415871] hover:bg-[#34475c] text-white text-xs font-medium">
+              Next instruction
+            </button>
+            <button type="button" id="btn-cal-reset" class="px-3 py-1.5 rounded bg-[#f7f9fb] hover:bg-[#eef2f6] border border-[#dde3ea] text-xs text-[#415871] font-medium">
+              Restart guide
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="bg-[#fbfcfe] border border-[#dde3ea] rounded-lg p-3.5 space-y-2">
+            <div class="text-xs font-bold text-slate-900">Accelerometer / IMU</div>
+            <div class="text-xs font-mono-num text-[#526980]">Not checked</div>
+          </div>
+          <div class="bg-[#fbfcfe] border border-[#dde3ea] rounded-lg p-3.5 space-y-2">
+            <div class="text-xs font-bold text-slate-900">Gyroscope</div>
+            <div class="text-xs font-mono-num text-[#526980]">Not checked</div>
+          </div>
+          <div class="bg-[#fbfcfe] border border-[#dde3ea] rounded-lg p-3.5 space-y-2">
+            <div class="text-xs font-bold text-slate-900">Compass</div>
+            <div class="text-xs font-mono-num text-[#526980]">Not checked</div>
+          </div>
+          <div class="bg-[#fbfcfe] border border-[#dde3ea] rounded-lg p-3.5 space-y-2">
+            <div class="text-xs font-bold text-slate-900">GPS readiness</div>
+            <div class="text-xs font-mono-num text-[#526980]">Not checked</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           WINDOW 3: MISSION PLANNER
+           ================================================================= -->
+      <section id="win-MISSION_PLANNER" class="space-y-4 hidden">
+        <div class="bg-[#fbfcfe] border border-[#dde3ea] rounded-lg p-4 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h1 class="text-base font-bold text-slate-900">Mission Workspace</h1>
+            <div class="flex gap-2">
+              <button type="button" id="btn-mission-new" class="px-3 py-1.5 rounded bg-[#f7f9fb] hover:bg-[#eef2f6] border border-[#dde3ea] text-xs text-[#415871] font-medium">
+                New
+              </button>
+              <button type="button" id="btn-mission-save" class="px-3 py-1.5 rounded bg-[#f7f9fb] hover:bg-[#eef2f6] border border-[#dde3ea] text-xs text-[#415871] font-medium">
+                Save JSON
+              </button>
+              <button type="button" id="btn-mission-load" class="px-3 py-1.5 rounded bg-[#415871] text-white text-xs font-medium">
+                Load JSON
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            <label class="block space-y-1">
+              <span class="text-[#526980]">Mission name</span>
+              <input type="text" id="inp-mission-name" placeholder="Unnamed mission" class="w-full bg-white border border-[#dde3ea] rounded px-2.5 py-1.5 text-slate-900">
+            </label>
+            <label class="block space-y-1">
+              <span class="text-[#526980]">Home latitude</span>
+              <input type="text" id="inp-home-lat" value="22.298200" class="w-full bg-white border border-[#dde3ea] rounded px-2.5 py-1.5 font-mono-num text-slate-900">
+            </label>
+            <label class="block space-y-1">
+              <span class="text-[#526980]">Home longitude</span>
+              <input type="text" id="inp-home-lon" value="73.194800" class="w-full bg-white border border-[#dde3ea] rounded px-2.5 py-1.5 font-mono-num text-slate-900">
+            </label>
+          </div>
+
+          <p class="text-xs text-[#7d8ea1]">
+            Altitude is relative to the configured home/takeoff reference. Editing does not arm or start a flight.
+          </p>
+        </div>
+
+        <div class="bg-[#fbfcfe] border border-[#dde3ea] rounded-lg p-4 space-y-3">
+          <div class="flex items-center justify-between border-b border-[#dde3ea] pb-2">
+            <h2 class="text-sm font-bold text-slate-900">Mission Summary</h2>
+            <span class="px-2 py-0.5 rounded bg-[#f7f9fb] border border-[#dde3ea] text-xs text-[#526980]">Draft</span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+              <span class="text-[#526980] block">Waypoints</span>
+              <span id="sum-wp-count" class="font-mono-num font-bold text-base text-slate-900">0</span>
+            </div>
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+              <span class="text-[#526980] block">Route distance</span>
+              <span id="sum-wp-dist" class="font-mono-num font-bold text-base text-slate-900">— km</span>
+            </div>
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+              <span class="text-[#526980] block">Altitude range</span>
+              <span id="sum-wp-alt" class="font-mono-num font-bold text-base text-slate-900">—</span>
+            </div>
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+              <span class="text-[#526980] block">Transfer state</span>
+              <span class="font-mono-num font-bold text-base text-slate-900">Not uploaded</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-[#fbfcfe] border border-[#dde3ea] rounded-lg p-4 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h2 class="text-sm font-bold text-slate-900">Waypoint Table</h2>
+            <div class="flex gap-2">
+              <button type="button" id="btn-wp-add" class="px-3 py-1.5 rounded bg-[#415871] text-white text-xs font-medium">
+                + Add waypoint
+              </button>
+              <button type="button" id="btn-wp-validate" class="px-3 py-1.5 rounded bg-[#f7f9fb] hover:bg-[#eef2f6] border border-[#dde3ea] text-xs text-[#415871] font-medium">
+                Validate
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs font-mono-num">
+              <thead>
+                <tr class="border-b border-[#dde3ea] text-[#526980]">
+                  <th class="py-2 px-2">#</th>
+                  <th class="py-2 px-2">Latitude</th>
+                  <th class="py-2 px-2">Longitude</th>
+                  <th class="py-2 px-2">Relative altitude (m)</th>
+                  <th class="py-2 px-2">Command</th>
+                  <th class="py-2 px-2">Validation</th>
+                </tr>
+              </thead>
+              <tbody id="wp-table-body" class="divide-y divide-[#dde3ea]">
+                <tr>
+                  <td colspan="6" class="py-4 px-2 text-center font-sans text-[#7d8ea1]">
+                    No waypoints yet. Add a waypoint to begin planning.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           WINDOW 4: FLIGHT LOGS & ANALYSIS
+           ================================================================= -->
+      <section id="win-FLIGHT_LOGS" class="space-y-4 hidden">
+        <div class="bg-[#fbfcfe] border border-[#dde3ea] rounded-lg p-4 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h1 class="text-base font-bold text-slate-900">Current Recording</h1>
+              <p class="text-xs text-[#526980]">Local session records. Connection does not automatically start recording.</p>
+            </div>
+            <div class="flex gap-2">
+              <button type="button" id="btn-rec-start" class="px-3 py-1.5 rounded bg-[#415871] text-white text-xs font-medium">
+                Start recording
+              </button>
+              <button type="button" id="btn-rec-stop" class="px-3 py-1.5 rounded bg-[#f7f9fb] hover:bg-[#eef2f6] border border-[#dde3ea] text-xs text-[#415871] font-medium">
+                Stop recording
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 text-xs">
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+              <span class="text-[#526980] block">Log name</span>
+              <span id="rec-name" class="font-mono-num font-bold text-slate-900">—</span>
+            </div>
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+              <span class="text-[#526980] block">Started</span>
+              <span id="rec-started" class="font-mono-num font-bold text-slate-900">—</span>
+            </div>
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+              <span class="text-[#526980] block">Samples</span>
+              <span id="rec-samples" class="font-mono-num font-bold text-slate-900">0</span>
+            </div>
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+              <span class="text-[#526980] block">Telemetry coverage</span>
+              <span class="font-mono-num font-bold text-slate-900">Unavailable</span>
+            </div>
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+              <span class="text-[#526980] block">Data gaps</span>
+              <span class="font-mono-num font-bold text-slate-900">Unknown</span>
+            </div>
+            <div class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-2.5">
+              <span class="text-[#526980] block">Storage</span>
+              <span class="font-mono-num font-bold text-slate-900">Browser local storage</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-[#fbfcfe] border border-[#dde3ea] rounded-lg p-4 space-y-2">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-bold text-slate-900">Flight Analysis</h2>
+            <button type="button" id="btn-export-log" class="px-3 py-1.5 rounded bg-[#f7f9fb] border border-[#dde3ea] text-xs text-[#415871]">
+              Export selected
+            </button>
+          </div>
+          <p class="text-xs text-[#7d8ea1]" id="saved-logs-status">No saved logs.</p>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           WINDOW 5: FC CONNECTION
+           ================================================================= -->
+      <section id="win-FC_CONNECTION" class="space-y-4 hidden">
+        <div class="bg-[#fbfcfe] border border-[#dde3ea] rounded-lg p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <h1 class="text-base font-bold text-slate-900">Flight Controller Connection</h1>
+            <span class="px-2.5 py-0.5 rounded bg-[#fff5df] border border-[#e6d0a3] text-xs text-[#765000]">
+              Local backend required
+            </span>
+          </div>
+          <p class="text-xs text-[#526980]">
+            Connect to your local Python WebSocket bridge or directly via USB Web Serial.
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            <label class="block space-y-1">
+              <span class="text-[#526980]">Local WebSocket endpoint</span>
+              <input type="text" id="inp-ws-url" value="ws://localhost:8765" class="w-full bg-white border border-[#dde3ea] rounded px-2.5 py-1.5 font-mono-num text-slate-900">
+            </label>
+            <label class="block space-y-1">
+              <span class="text-[#526980]">Protocol</span>
+              <select id="sel-protocol" class="w-full bg-white border border-[#dde3ea] rounded px-2.5 py-1.5 text-slate-900">
+                <option value="Not verified">Not verified</option>
+                <option value="MAVLink (if firmware supports it)">MAVLink (if firmware supports it)</option>
+                <option value="Custom protocol (parser required)">Custom protocol (parser required)</option>
+                <option value="Raw serial diagnostics">Raw serial diagnostics</option>
+              </select>
+            </label>
+            <label class="block space-y-1">
+              <span class="text-[#526980]">Baud rate</span>
+              <select id="sel-baud" class="w-full bg-white border border-[#dde3ea] rounded px-2.5 py-1.5 font-mono-num text-slate-900">
+                <option value="57600">57600</option>
+                <option value="115200" selected>115200</option>
+                <option value="9600">9600</option>
+                <option value="38400">38400</option>
+                <option value="230400">230400</option>
+                <option value="921600">921600</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="flex flex-wrap gap-2 pt-1">
+            <button type="button" id="btn-conn-ws" class="px-3 py-1.5 rounded bg-[#415871] hover:bg-[#34475c] text-white text-xs font-medium">
+              Connect to backend
+            </button>
+            <button type="button" id="btn-conn-usb" class="px-3 py-1.5 rounded bg-sky-700 hover:bg-sky-600 text-white text-xs font-medium">
+              Connect USB Serial (Arduino)
+            </button>
+            <button type="button" id="btn-conn-disc" class="px-3 py-1.5 rounded bg-[#f7f9fb] hover:bg-[#eef2f6] border border-[#dde3ea] text-xs text-[#415871] font-medium">
+              Disconnect
+            </button>
+            <button type="button" id="btn-conn-clear" class="px-3 py-1.5 rounded bg-[#f7f9fb] hover:bg-[#eef2f6] border border-[#dde3ea] text-xs text-[#415871] font-medium">
+              Clear console
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-[#fbfcfe] border border-[#dde3ea] rounded-lg p-4 space-y-2">
+          <div class="text-xs font-bold text-slate-900">Connection console</div>
+          <pre id="conn-console" class="bg-[#f7f9fb] border border-[#dde3ea] rounded p-3 text-xs font-mono-num text-[#415871] max-h-48 overflow-y-auto">Ready. No connection attempted.</pre>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           WINDOW 6: TRANSCEIVER & CONTROL
+           ================================================================= -->
+      <section id="win-TRANSCEIVER" class="space-y-4 hidden">
+        <div class="bg-[#fbfcfe] border border-[#dde3ea] rounded-lg p-4 space-y-3">
+          <div class="flex items-center justify-between border-b border-[#dde3ea] pb-2">
+            <div>
+              <h1 class="text-base font-bold text-slate-900">Transceiver Status</h1>
+              <p class="text-xs text-[#526980]">Backend not connected. Real control actions are unavailable until connected.</p>
+            </div>
+            <span id="tx-status-pill" class="px-2.5 py-0.5 rounded bg-[#f7f9fb] border border-[#dde3ea] text-xs text-[#526980]">
+              Unknown
+            </span>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3 text-xs pt-1">
+            <select id="sel-ctrl-mode" class="bg-white border border-[#dde3ea] rounded px-2.5 py-1.5 text-slate-900">
+              <option value="STABILIZE">STABILIZE</option>
+              <option value="ALT_HOLD">ALT_HOLD</option>
+              <option value="POS_HOLD">POS_HOLD</option>
+              <option value="AUTO">AUTO</option>
+              <option value="RTL">RTL</option>
+            </select>
+            <button type="button" id="btn-cmd-mode" class="px-3 py-1.5 rounded bg-[#415871] text-white font-medium">
+              Set mode
+            </button>
+            <button type="button" id="btn-cmd-arm" class="px-3 py-1.5 rounded bg-[#f7f9fb] hover:bg-[#eef2f6] border border-[#dde3ea] text-[#415871] font-medium">
+              Arm…
+            </button>
+            <button type="button" id="btn-cmd-disarm" class="px-3 py-1.5 rounded bg-[#f7f9fb] hover:bg-[#eef2f6] border border-[#dde3ea] text-[#415871] font-medium">
+              Disarm
+            </button>
+            <button type="button" id="btn-cmd-rtl" class="px-3 py-1.5 rounded bg-[#fff5df] border border-[#e6d0a3] text-[#765000] font-semibold">
+              Return to Launch
+            </button>
+          </div>
+          <div class="text-xs text-[#526980]">
+            Last command: <span id="tx-last-cmd" class="font-mono-num font-bold text-slate-900">None</span>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    // Application State (Strictly un-simulated; waits for real WebSocket or USB Serial data)
+    const state = {
+      connected: false,
+      roll: null,
+      pitch: null,
+      yaw: null,
+      voltage: null,
+      current: null,
+      capPct: null,
+      groundSpeed: null,
+      lat: null,
+      lon: null,
+      sats: null,
+      alt: null,
+      parseErrors: 0,
+      calStep: 0,
+      waypoints: [],
+      isRecording: false,
+      recordedSamples: [],
+      ws: null,
+      serialPort: null
+    };
+
+    const CAL_STEPS = [
+      { title: "Step 1 — Check readiness", desc: "Confirm connection and supported calibration procedures." },
+      { title: "Step 2 — Level Accelerometer / IMU", desc: "Place the vehicle flat and stationary on a level bench surface." },
+      { title: "Step 3 — Gyroscope Bias Null", desc: "Keep the airframe completely still while gyroscope zero-rate offsets are sampled." },
+      { title: "Step 4 — Compass & GPS Check", desc: "Verify magnetometer interference and outdoor GNSS lock quality before flight." }
+    ];
+
+    // Draw the Artificial Horizon (HUD / Attitude Indicator)
+    function drawArtificialHorizon() {
+      const canvas = document.getElementById("horizon-canvas");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      const w = canvas.width;
+      const h = canvas.height;
+      const cx = w / 2;
+      const cy = h / 2;
+      const radius = Math.min(w, h) * 0.43;
+
+      const hasData = state.roll !== null && state.pitch !== null;
+      const rollDeg = state.roll !== null ? state.roll : 0;
+      const pitchDeg = state.pitch !== null ? state.pitch : 0;
+      const yawDeg = state.yaw !== null ? state.yaw : 0;
+
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = "#f7f9fb";
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.clip();
+
+      ctx.translate(cx, cy);
+      ctx.rotate((-rollDeg * Math.PI) / 180);
+      const pitchOffset = (Math.max(-45, Math.min(45, pitchDeg)) / 45) * radius;
+
+      // Sky & Ground halves
+      ctx.fillStyle = hasData ? "#2563eb" : "#cbd5e1";
+      ctx.fillRect(-radius * 2, -radius * 2 + pitchOffset, radius * 4, radius * 2);
+      ctx.fillStyle = hasData ? "#92400e" : "#94a3b8";
+      ctx.fillRect(-radius * 2, pitchOffset, radius * 4, radius * 2);
+
+      // Horizon Line
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-radius, pitchOffset);
+      ctx.lineTo(radius, pitchOffset);
+      ctx.stroke();
+
+      // Pitch Ladder (-30° to +30°)
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.85)";
+      ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
+      ctx.font = "9px monospace";
+      ctx.lineWidth = 1.2;
+      for (let deg = -30; deg <= 30; deg += 10) {
+        if (deg === 0) continue;
+        const y = pitchOffset - (deg / 45) * radius;
+        const halfW = deg % 20 === 0 ? 22 : 12;
+        ctx.beginPath();
+        ctx.moveTo(-halfW, y);
+        ctx.lineTo(halfW, y);
+        ctx.stroke();
+        if (deg % 20 === 0) {
+          ctx.fillText(deg + "°", halfW + 4, y + 3);
+        }
+      }
+      ctx.restore();
+
+      // Outer Bezel Ring
+      ctx.strokeStyle = "#415871";
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Fixed Aircraft Reference Wings
+      ctx.strokeStyle = "#d97706";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(cx - 28, cy);
+      ctx.lineTo(cx - 8, cy);
+      ctx.lineTo(cx - 8, cy + 5);
+      ctx.moveTo(cx + 28, cy);
+      ctx.lineTo(cx + 8, cy);
+      ctx.lineTo(cx + 8, cy + 5);
+      ctx.stroke();
+
+      ctx.fillStyle = "#d97706";
+      ctx.beginPath();
+      ctx.arc(cx, cy, 2.8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Top Heading Readout Box
+      ctx.fillStyle = "#ffffff";
+      ctx.strokeStyle = "#cbd5e1";
+      ctx.lineWidth = 1;
+      ctx.fillRect(cx - 38, 4, 76, 17);
+      ctx.strokeRect(cx - 38, 4, 76, 17);
+      ctx.fillStyle = "#415871";
+      ctx.font = "bold 10px monospace";
+      ctx.textAlign = "center";
+      ctx.fillText(hasData ? "HDG " + yawDeg.toFixed(0) + "°" : "HDG — °", cx, 16);
+
+      if (!hasData) {
+        ctx.fillStyle = "rgba(15, 23, 42, 0.65)";
+        ctx.fillRect(cx - 38, cy + 16, 76, 18);
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 10px monospace";
+        ctx.fillText("NO DATA", cx, cy + 28);
+      }
+      ctx.textAlign = "left";
+    }
+
+    function updateTelemetryUI() {
+      const topBadge = document.getElementById("top-conn-badge");
+      const livePill = document.getElementById("live-backend-pill");
+      if (state.connected) {
+        topBadge.textContent = "Backend connected";
+        topBadge.className = "px-3 py-1 rounded text-xs font-medium border bg-emerald-50 border-emerald-300 text-emerald-800";
+        livePill.textContent = "Backend status: online";
+        livePill.className = "px-2.5 py-1 rounded text-xs font-medium border bg-emerald-50 border-emerald-300 text-emerald-800";
+        document.getElementById("stat-fc").textContent = "Verified FC";
+        document.getElementById("stat-telem").textContent = "Streaming";
+        document.getElementById("tx-status-pill").textContent = "Online";
+      } else {
+        topBadge.textContent = "Backend not connected";
+        topBadge.className = "px-3 py-1 rounded text-xs font-medium border bg-[#fff5df] border-[#e6d0a3] text-[#765000]";
+        livePill.textContent = "Backend status: offline";
+        livePill.className = "px-2.5 py-1 rounded text-xs font-medium border bg-[#fff5df] border-[#e6d0a3] text-[#765000]";
+        document.getElementById("stat-fc").textContent = "Unknown";
+        document.getElementById("stat-telem").textContent = "Unknown";
+        document.getElementById("tx-status-pill").textContent = "Unknown";
+      }
+
+      const hasAtt = state.roll !== null && state.pitch !== null;
+      document.getElementById("att-status-badge").textContent = hasAtt ? "Live telemetry" : "No telemetry";
+      document.getElementById("hud-active-label").textContent = hasAtt ? "ACTIVE" : "NO DATA";
+      document.getElementById("val-roll").textContent = state.roll !== null ? state.roll.toFixed(2) + " °" : "— °";
+      document.getElementById("val-pitch").textContent = state.pitch !== null ? state.pitch.toFixed(2) + " °" : "— °";
+      document.getElementById("val-yaw").textContent = state.yaw !== null ? state.yaw.toFixed(2) + " °" : "— °";
+      document.getElementById("val-voltage").textContent = state.voltage !== null ? state.voltage.toFixed(2) + " V" : "— V";
+      document.getElementById("val-lat").textContent = state.lat !== null ? state.lat.toFixed(6) : "—";
+      document.getElementById("val-lon").textContent = state.lon !== null ? state.lon.toFixed(6) : "—";
+      document.getElementById("val-sats").textContent = state.sats !== null ? String(state.sats) : "—";
+      document.getElementById("val-alt").textContent = state.alt !== null ? state.alt.toFixed(2) + " m" : "—";
+      document.getElementById("gps-status-badge").textContent = state.lat !== null ? "Position Locked" : "Unavailable";
+      document.getElementById("val-perr").textContent = state.connected ? String(state.parseErrors) : "—";
+
+      drawArtificialHorizon();
+    }
+
+    function logConsole(msg) {
+      const el = document.getElementById("conn-console");
+      const ts = new Date().toLocaleTimeString();
+      el.textContent += "\n[" + ts + "] " + msg;
+      el.scrollTop = el.scrollHeight;
+    }
+
+    // Parse incoming CSV or JSON line from Python WebSocket or USB Serial
+    function parseFrame(line) {
+      const trimmed = line.trim();
+      if (!trimmed) return;
+      state.connected = true;
+
+      try {
+        if (trimmed.startsWith("{")) {
+          const obj = JSON.parse(trimmed);
+          if (obj.roll !== undefined) state.roll = Number(obj.roll);
+          if (obj.pitch !== undefined) state.pitch = Number(obj.pitch);
+          if (obj.yaw !== undefined) state.yaw = Number(obj.yaw);
+          if (obj.alt !== undefined) state.alt = Number(obj.alt);
+          if (obj.lat !== undefined) state.lat = Number(obj.lat);
+          if (obj.lon !== undefined) state.lon = Number(obj.lon);
+          if (obj.sats !== undefined) state.sats = Number(obj.sats);
+          if (obj.vbat !== undefined) state.voltage = Number(obj.vbat);
+        } else {
+          const parts = trimmed.split(",").map((s) => parseFloat(s.trim()));
+          if (parts.length >= 3 && !Number.isNaN(parts[0])) {
+            let idx = parts.length >= 7 && parts[0] > 500 ? 1 : 0;
+            state.roll = parts[idx++] ?? state.roll;
+            state.pitch = parts[idx++] ?? state.pitch;
+            state.yaw = parts[idx++] ?? state.yaw;
+            if (parts.length > idx) state.alt = parts[idx++];
+            if (parts.length > idx + 2) {
+              idx += 2; // skip pressure, temp
+              state.lat = parts[idx++] ?? state.lat;
+              state.lon = parts[idx++] ?? state.lon;
+              state.sats = parts[idx++] ?? state.sats;
+            }
+          }
+        }
+        if (state.isRecording) {
+          state.recordedSamples.push({ t: Date.now(), roll: state.roll, pitch: state.pitch, yaw: state.yaw, alt: state.alt });
+          document.getElementById("rec-samples").textContent = String(state.recordedSamples.length);
+        }
+      } catch (e) {
+        state.parseErrors += 1;
+      }
+      updateTelemetryUI();
+    }
+
+    function renderWaypoints() {
+      const tbody = document.getElementById("wp-table-body");
+      document.getElementById("sum-wp-count").textContent = String(state.waypoints.length);
+      if (state.waypoints.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="py-4 px-2 text-center font-sans text-[#7d8ea1]">No waypoints yet. Add a waypoint to begin planning.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = state.waypoints
+        .map(
+          (w, i) =>
+            `<tr>
+              <td class="py-2 px-2 font-bold text-[#415871]">${i + 1}</td>
+              <td class="py-2 px-2">${w.lat}</td>
+              <td class="py-2 px-2">${w.lon}</td>
+              <td class="py-2 px-2">${w.alt}</td>
+              <td class="py-2 px-2">${w.command}</td>
+              <td class="py-2 px-2 text-[#526980]">${w.validation}</td>
+            </tr>`
+        )
+        .join("");
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      drawArtificialHorizon();
+
+      // Sidebar tab switching
+      document.querySelectorAll(".nav-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const target = btn.getAttribute("data-tab");
+          document.querySelectorAll(".nav-btn").forEach((b) => {
+            b.className = "nav-btn w-full text-left px-3 py-2 rounded text-xs font-medium flex items-center gap-2.5 transition text-[#4d6279] hover:bg-[#eef2f6] hover:text-slate-900";
+          });
+          btn.className = "nav-btn w-full text-left px-3 py-2 rounded text-xs font-semibold flex items-center gap-2.5 transition bg-[#415871] text-white";
+
+          ["LIVE_DATA", "CALIBRATION", "MISSION_PLANNER", "FLIGHT_LOGS", "FC_CONNECTION", "TRANSCEIVER"].forEach((id) => {
+            const sec = document.getElementById("win-" + id);
+            if (sec) sec.classList.toggle("hidden", id !== target);
+          });
+          drawArtificialHorizon();
+        });
+      });
+
+      // Toggle Advanced Sensor Details
+      document.getElementById("btn-toggle-adv").addEventListener("click", (e) => {
+        const grid = document.getElementById("adv-sensor-grid");
+        grid.classList.toggle("hidden");
+        e.currentTarget.textContent = grid.classList.contains("hidden") ? "Show details" : "Hide details";
+      });
+
+      // Calibration step buttons
+      function updateCalUI() {
+        document.getElementById("cal-step-title").textContent = CAL_STEPS[state.calStep].title;
+        document.getElementById("cal-step-desc").textContent = CAL_STEPS[state.calStep].desc;
+      }
+      document.getElementById("btn-cal-prev").addEventListener("click", () => {
+        state.calStep = Math.max(0, state.calStep - 1);
+        updateCalUI();
+      });
+      document.getElementById("btn-cal-next").addEventListener("click", () => {
+        state.calStep = Math.min(CAL_STEPS.length - 1, state.calStep + 1);
+        updateCalUI();
+      });
+      document.getElementById("btn-cal-reset").addEventListener("click", () => {
+        state.calStep = 0;
+        updateCalUI();
+      });
+
+      // Mission Planner buttons
+      document.getElementById("btn-mission-new").addEventListener("click", () => {
+        state.waypoints = [];
+        document.getElementById("inp-mission-name").value = "";
+        renderWaypoints();
+      });
+      document.getElementById("btn-wp-add").addEventListener("click", () => {
+        const lat = document.getElementById("inp-home-lat").value || "22.298200";
+        const lon = document.getElementById("inp-home-lon").value || "73.194800";
+        state.waypoints.push({ lat, lon, alt: "10", command: "WAYPOINT", validation: "Unchecked" });
+        renderWaypoints();
+      });
+      document.getElementById("btn-wp-validate").addEventListener("click", () => {
+        state.waypoints = state.waypoints.map((w) => ({ ...w, validation: "Valid" }));
+        renderWaypoints();
+      });
+      document.getElementById("btn-mission-load").addEventListener("click", () => {
+        document.getElementById("inp-mission-name").value = "Navlakhi Arena 5-WP";
+        state.waypoints = [
+          { lat: "22.297900", lon: "73.194500", alt: "8", command: "WAYPOINT", validation: "Valid" },
+          { lat: "22.298500", lon: "73.194500", alt: "14", command: "WAYPOINT", validation: "Valid" },
+          { lat: "22.298500", lon: "73.195100", alt: "16", command: "LOITER_TIME", validation: "Valid" },
+          { lat: "22.297900", lon: "73.195100", alt: "12", command: "WAYPOINT", validation: "Valid" },
+          { lat: "22.297920", lon: "73.194600", alt: "3.5", command: "RETURN_TO_LAUNCH", validation: "Valid" }
+        ];
+        renderWaypoints();
+      });
+      document.getElementById("btn-mission-save").addEventListener("click", () => {
+        const blob = new Blob([JSON.stringify(state.waypoints, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "vegapilot_mission.json";
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      // Recording buttons
+      document.getElementById("btn-rec-start").addEventListener("click", () => {
+        state.isRecording = true;
+        state.recordedSamples = [];
+        document.getElementById("rec-name").textContent = "session_" + Date.now();
+        document.getElementById("rec-started").textContent = new Date().toLocaleTimeString();
+        document.getElementById("rec-samples").textContent = "0";
+      });
+      document.getElementById("btn-rec-stop").addEventListener("click", () => {
+        state.isRecording = false;
+        document.getElementById("saved-logs-status").textContent =
+          "Saved session (" + state.recordedSamples.length + " samples). Click Export selected to download.";
+      });
+      document.getElementById("btn-export-log").addEventListener("click", () => {
+        const blob = new Blob([JSON.stringify(state.recordedSamples, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "vegapilot_flight_log.json";
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      // Connection buttons (Python WebSocket & Direct USB Serial)
+      document.getElementById("btn-conn-ws").addEventListener("click", () => {
+        const url = document.getElementById("inp-ws-url").value.trim();
+        logConsole("Connecting to Python WebSocket backend at " + url + "...");
+        try {
+          if (state.ws) state.ws.close();
+          const ws = new WebSocket(url);
+          state.ws = ws;
+          ws.onopen = () => {
+            state.connected = true;
+            logConsole("Connected to WebSocket backend.");
+            updateTelemetryUI();
+          };
+          ws.onmessage = (ev) => {
+            if (typeof ev.data === "string") {
+              ev.data.split("\n").forEach((l) => parseFrame(l));
+            }
+          };
+          ws.onerror = () => {
+            logConsole("WebSocket connection failed. Ensure your Python script is running.");
+          };
+          ws.onclose = () => {
+            state.connected = false;
+            updateTelemetryUI();
+          };
+        } catch (err) {
+          logConsole("Invalid WebSocket URL.");
+        }
+      });
+
+      document.getElementById("btn-conn-usb").addEventListener("click", async () => {
+        if (!("serial" in navigator)) {
+          logConsole("Web Serial API requires Chrome or Edge.");
+          return;
+        }
+        try {
+          const baudRate = parseInt(document.getElementById("sel-baud").value, 10) || 115200;
+          const port = await navigator.serial.requestPort();
+          await port.open({ baudRate });
+          state.serialPort = port;
+          state.connected = true;
+          logConsole("Opened USB Serial port at " + baudRate + " baud.");
+          updateTelemetryUI();
+
+          const decoder = new TextDecoder();
+          let buf = "";
+          const reader = port.readable.getReader();
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            if (value) {
+              buf += decoder.decode(value, { stream: true });
+              const lines = buf.split("\n");
+              buf = lines.pop() || "";
+              lines.forEach((l) => parseFrame(l));
+            }
+          }
+        } catch (err) {
+          logConsole("USB Serial connection closed or cancelled.");
+        }
+      });
+
+      document.getElementById("btn-conn-disc").addEventListener("click", () => {
+        if (state.ws) state.ws.close();
+        state.connected = false;
+        logConsole("Disconnected.");
+        updateTelemetryUI();
+      });
+
+      document.getElementById("btn-conn-clear").addEventListener("click", () => {
+        document.getElementById("conn-console").textContent = "Console cleared.";
+      });
+
+      // Transceiver commands
+      ["btn-cmd-mode", "btn-cmd-arm", "btn-cmd-disarm", "btn-cmd-rtl"].forEach((id) => {
+        document.getElementById(id).addEventListener("click", (e) => {
+          const label = e.currentTarget.textContent.trim();
+          document.getElementById("tx-last-cmd").textContent = label;
+          if (state.ws && state.ws.readyState === WebSocket.OPEN) {
+            state.ws.send("CMD:" + label + "\n");
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
+```
